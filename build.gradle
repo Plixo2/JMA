@@ -1,0 +1,32 @@
+plugins {
+    id 'java'
+}
+
+group = 'org.karina'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    compileOnly 'org.jetbrains:annotations:23.0.0'
+
+    compileOnly 'org.projectlombok:lombok:1.18.36'
+    annotationProcessor 'org.projectlombok:lombok:1.18.36'
+
+    implementation 'org.ow2.asm:asm:9.7'
+    implementation 'org.ow2.asm:asm-commons:9.7'
+    implementation 'org.ow2.asm:asm-util:9.7'
+    implementation 'org.ow2.asm:asm-tree:9.7'
+
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    implementation 'com.google.errorprone:error_prone_annotation:2.38.0'
+}
+
+test {
+    useJUnitPlatform()
+}
