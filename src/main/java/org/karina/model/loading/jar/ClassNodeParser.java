@@ -1,5 +1,6 @@
 package org.karina.model.loading.jar;
 
+import com.google.errorprone.annotations.CheckReturnValue;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -7,6 +8,7 @@ import org.karina.model.exceptions.JarFileException;
 import org.karina.model.loading.jar.signature.ClassSignature;
 import org.karina.model.loading.jar.signature.SignatureParser;
 import org.karina.model.model.*;
+import org.karina.model.util.Flags;
 import org.karina.model.util.LoadedClassIdentifier;
 import org.objectweb.asm.tree.ClassNode;
 
@@ -21,11 +23,15 @@ public final class ClassNodeParser {
     /// @return a ClassModel for the given ClassNode.
     /// @throws NullPointerException if `identifier` or `node` is `null`
     @Contract(pure = true, value = "_, null -> fail; null, _ -> fail; _, _ -> new")
+    @CheckReturnValue
     public static UnlinkedClass parse(LoadedClassIdentifier identifier, ClassNode node) {
         Objects.requireNonNull(node, "ClassNode cannot be null");
 
         var flags = node.access;
         var version = node.version;
+        if (version == 0) {
+            version = Flags.VERSION_LATEST;
+        }
         var binaryName = Objects.requireNonNull(node.name, "ClassNode name cannot be null");
 
         var superName = node.superName;

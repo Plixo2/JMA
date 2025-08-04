@@ -25,7 +25,7 @@ public final class UnlinkedModel {
     /// @throws NullPointerException when unlinkedClass is null
     /// @throws JarFileException.DuplicateClass when two classes have the same name
     @Contract(pure = true, value = "null -> fail")
-    static UnlinkedModel of(UnlinkedClass unlinkedClass) {
+    public static UnlinkedModel of(UnlinkedClass unlinkedClass) {
         Objects.requireNonNull(unlinkedClass, "UnlinkedClass cannot be null");
         var map = Map.of(unlinkedClass.name(), unlinkedClass);
         return new UnlinkedModel(map);
@@ -34,7 +34,7 @@ public final class UnlinkedModel {
     /// @throws NullPointerException when classes is null or contains null elements
     /// @throws JarFileException.DuplicateClass when two classes have the same name
     @Contract(pure = true, value = "null -> fail")
-    static UnlinkedModel of(UnlinkedClass... classes) {
+    public  static UnlinkedModel of(UnlinkedClass... classes) {
         Objects.requireNonNull(classes, "UnlinkedClass array cannot be null");
         var builder = UnlinkedModel.builder();
         for (var cls : classes) {
@@ -47,7 +47,7 @@ public final class UnlinkedModel {
     /// @throws NullPointerException when classes is null or contains null elements
     /// @throws JarFileException.DuplicateClass when two classes have the same name
     @Contract(pure = true, value = "null -> fail")
-    static UnlinkedModel of(Iterable<UnlinkedClass> classes) {
+    public static UnlinkedModel of(Iterable<UnlinkedClass> classes) {
         Objects.requireNonNull(classes, "UnlinkedClass array cannot be null");
         var builder = UnlinkedModel.builder();
         for (var cls : classes) {
@@ -57,16 +57,16 @@ public final class UnlinkedModel {
         return builder.build();
     }
 
-    static UnlinkedModelBuilder builder() {
+    public static UnlinkedModelBuilder builder() {
         return new UnlinkedModelBuilder();
     }
 
     /// @throws NullPointerException when model is null
     /// @throws JarFileException.DuplicateClass when two classes have the same name
     @Contract(pure = true, value = "null -> fail")
-    static UnlinkedModelBuilder builder(UnlinkedModel models) {
+    public  static UnlinkedModelBuilder builder(UnlinkedModel model) {
         var builder = new UnlinkedModelBuilder();
-        for (var value : models.classes.values()) {
+        for (var value : model.classes.values()) {
             Objects.requireNonNull(value);
             builder.add(value);
         }
@@ -76,7 +76,7 @@ public final class UnlinkedModel {
     /// @throws NullPointerException when models is null or contains null elements
     /// @throws JarFileException.DuplicateClass when two classes have the same name
     @Contract(pure = true, value = "null -> fail")
-    static UnlinkedModelBuilder builder(UnlinkedModel... models) {
+    public static UnlinkedModelBuilder builder(UnlinkedModel... models) {
         var builder = new UnlinkedModelBuilder();
         for (var model : models) {
             Objects.requireNonNull(model, "UnlinkedModel cannot be null");

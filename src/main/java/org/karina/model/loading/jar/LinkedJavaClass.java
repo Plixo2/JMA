@@ -39,7 +39,12 @@ class LinkedJavaClass implements ClassModel {
     private final List<? extends FieldModel> fields;
     private final List<? extends MethodModel> methods;
 
-/*
+    @Override
+    public String toString() {
+        return "LinkedJavaClass{" + "binaryName='" + this.binaryName + '\'' + '}';
+    }
+
+    /*
     @Override
     public int version() {
         return 0;

@@ -1,16 +1,23 @@
 package org.karina.model.model;
 
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 import org.jetbrains.annotations.Unmodifiable;
+import org.karina.model.model.impl.SimpleModel;
 import org.karina.model.typing.types.ReferenceType;
+import org.karina.model.util.Flags;
 import org.karina.model.util.ObjectPath;
 import org.karina.model.model.pointer.ClassPointer;
 import org.karina.model.model.pointer.MethodPointer;
 import org.karina.model.util.LoadedClassIdentifier;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /// Represents a class.
 public interface ClassModel {
@@ -189,5 +196,193 @@ public interface ClassModel {
         /// @see org.karina.model.util.Flags
         @Contract(pure = true)
         int flags();
+    }
+
+
+    static ClassModelBuilder builder() {
+        return new ClassModelBuilder();
+    }
+
+    static ClassModelBuilder builder(ClassModel model) {
+        var builder = new ClassModelBuilder();
+        builder.version = model.version();
+        builder.binaryName = model.binaryName();
+        builder.path = model.path();
+        builder.flags = model.flags();
+        builder.innerClassInfo = model.innerClassInfo();
+        builder.generics.addAll(model.generics());
+        builder.superClass = model.superClass();
+        builder.interfaces.addAll(model.interfaces());
+        builder.compiledSource = model.compiledSource();
+        builder.identifier = model.identifier();
+        builder.outerClass = model.outerClass();
+        builder.enclosingMethod = model.enclosingMethod();
+        builder.annotations.addAll(model.annotations());
+        builder.nestedClasses.addAll(model.nestedClasses());
+        builder.nestHost = model.nestHost();
+        builder.nestMembers.addAll(model.nestMembers());
+        builder.permittedSubclasses.addAll(model.permittedSubclasses());
+        builder.fields.addAll(model.fields());
+        builder.methods.addAll(model.methods());
+        return builder;
+    }
+
+
+    @Setter
+    @Accessors(chain = true, fluent = true)
+    class ClassModelBuilder {
+        private int version;
+        private String binaryName;
+        private ObjectPath path;
+        private int flags;
+        private @Nullable InnerClassInfo innerClassInfo;
+        private List<GenericModel> generics = new ArrayList<>();
+        private @Nullable ReferenceType.ClassType superClass;
+        private List<ReferenceType.ClassType> interfaces = new ArrayList<>();
+        private @Nullable String compiledSource;
+        private LoadedClassIdentifier identifier;
+        private @Nullable ClassPointer outerClass;
+        private @Nullable ClassModel.LocalAndAnonymousInfo enclosingMethod;
+        private List<Annotation> annotations = new ArrayList<>();
+        private List<ClassPointer> nestedClasses = new ArrayList<>();
+        private @Nullable ClassPointer nestHost;
+        private List<ClassPointer> nestMembers = new ArrayList<>();
+        private List<ClassPointer> permittedSubclasses = new ArrayList<>();
+        private List<FieldModel> fields = new ArrayList<>();
+        private List<MethodModel> methods = new ArrayList<>();
+
+        private ClassModelBuilder() {}
+
+        public ClassModelBuilder addGeneric(GenericModel generic) {
+            this.generics.add(generic);
+            return this;
+        }
+
+        public ClassModelBuilder addInterface(ReferenceType.ClassType interfaces) {
+            this.interfaces.add(interfaces);
+            return this;
+        }
+
+        public ClassModelBuilder addAnnotation(Annotation annotation) {
+            this.annotations.add(annotation);
+            return this;
+        }
+
+        public ClassModelBuilder addNestedClass(ClassPointer nestedClass) {
+            this.nestedClasses.add(nestedClass);
+            return this;
+        }
+
+        public ClassModelBuilder addNestMember(ClassPointer nestMember) {
+            this.nestMembers.add(nestMember);
+            return this;
+        }
+
+        public ClassModelBuilder addPermittedSubclass(ClassPointer permittedSubclass) {
+            this.permittedSubclasses.add(permittedSubclass);
+            return this;
+        }
+
+        public ClassModelBuilder addField(FieldModel field) {
+            this.fields.add(field);
+            return this;
+        }
+
+        public ClassModelBuilder addMethod(MethodModel method) {
+            this.methods.add(method);
+            return this;
+        }
+
+        public ClassModel build() {
+
+            //<editor-fold desc="Record">
+            record BuildClass(
+                int version,
+                String binaryName,
+                ObjectPath path,
+                ClassPointer classPointer,
+                int flags,
+                InnerClassInfo innerClassInfo,
+                List<? extends GenericModel> generics,
+                ReferenceType.ClassType superClass,
+                List<? extends ReferenceType.ClassType> interfaces,
+                String compiledSource,
+                LoadedClassIdentifier identifier,
+                ClassPointer outerClass,
+                ClassModel.LocalAndAnonymousInfo enclosingMethod,
+                List<Annotation> annotations,
+                List<ClassPointer> nestedClasses,
+                ClassPointer nestHost,
+                List<ClassPointer> nestMembers,
+                List<ClassPointer> permittedSubclasses,
+                List<? extends FieldModel> fields,
+                List<? extends MethodModel> methods
+            ) implements ClassModel {}
+            //</editor-fold>
+
+            var version = this.version;
+            if (version == 0) {
+                version = Flags.VERSION_LATEST;
+            }
+
+            Objects.requireNonNull(this.binaryName, "Missing binary name");
+            Objects.requireNonNull(this.path, "Missing path");
+
+            if (this.innerClassInfo != null) {
+                Objects.requireNonNull(this.innerClassInfo.name(), "Missing inner class name");
+            }
+
+            Objects.requireNonNull(this.generics, "Missing generics");
+
+            var superClass = this.superClass;
+            if (!this.binaryName.equals("java/lang/Object")) {
+                if (superClass == null) {
+                    superClass = new ReferenceType.ClassType(
+                            SimpleModel.simpleClassPointer("java/lang/Object"),
+                            List.of()
+                    );
+                }
+            }
+
+            Objects.requireNonNull(this.interfaces, "Missing interfaces");
+            Objects.requireNonNull(this.identifier, "Missing identifier");
+
+            if (this.enclosingMethod != null) {
+                Objects.requireNonNull(this.enclosingMethod.classPointer(), "Missing enclosing method class pointer");
+            }
+
+            Objects.requireNonNull(this.annotations, "Missing annotations");
+            Objects.requireNonNull(this.nestedClasses, "Missing nested classes");
+            Objects.requireNonNull(this.nestMembers, "Missing nest members");
+            Objects.requireNonNull(this.permittedSubclasses, "Missing permitted subclasses");
+            Objects.requireNonNull(this.fields, "Missing fields");
+            Objects.requireNonNull(this.methods, "Missing methods");
+
+            var classPointer = SimpleModel.simpleClassPointer(this.binaryName);
+
+
+            return new BuildClass(
+                    version,
+                    this.binaryName,
+                    this.path,
+                    classPointer,
+                    this.flags,
+                    this.innerClassInfo,
+                    this.generics,
+                    superClass,
+                    this.interfaces,
+                    this.compiledSource,
+                    this.identifier,
+                    this.outerClass,
+                    this.enclosingMethod,
+                    this.annotations,
+                    this.nestedClasses,
+                    this.nestHost,
+                    this.nestMembers,
+                    this.permittedSubclasses,
+                    this.fields,
+                    this.methods
+            );
+        }
     }
 }

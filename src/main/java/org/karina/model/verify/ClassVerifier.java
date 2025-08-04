@@ -75,7 +75,16 @@ public final class ClassVerifier implements Flags {
 
 
     public void verifyPath() {
+        if (this.classModel.path().isEmpty()) {
+            // error
+        }
 
+        var last = this.classModel.path().last();
+        var name = this.classModel.binaryName();
+
+        if (!name.endsWith(last)) {
+            // error
+        }
     }
 
     public void verifyAnnotations() {

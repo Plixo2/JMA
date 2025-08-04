@@ -23,12 +23,19 @@ import java.util.Objects;
 
 
 public final class ModelLinker {
+    public static final ModelLinker DEFAULT = new ModelLinker();
+
     private final Model existingClasses;
+
 
     @Contract(value = "null -> fail")
     public ModelLinker(Model existingClasses) {
         Objects.requireNonNull(existingClasses, "Existing classes cannot be null");
         this.existingClasses = existingClasses;
+    }
+
+    private ModelLinker() {
+        this(Model.EMPTY);
     }
 
     /// Links the given model to the existing classes.

@@ -37,7 +37,7 @@ public sealed abstract class JarFileException extends RuntimeException {
         private final String name;
 
         public InvalidClassReferenceException(LoadedClassIdentifier identifier, String name, String message) {
-            super(message + " (in class " + identifier + ")");
+            super(message + " (in class " + identifier.identifier() + ")");
             this.identifier = identifier;
             this.name = name;
         }
@@ -68,7 +68,7 @@ public sealed abstract class JarFileException extends RuntimeException {
         }
 
         private static String toString(LoadedClassIdentifier identifier, String signature, int index, String message) {
-            return "Invalid signature '" + signature + "' at index " + index + " in class " + identifier + ": " + message;
+            return "Invalid signature '" + signature + "' at index " + index + " in class " + identifier.identifier() + ": " + message;
         }
     }
 }

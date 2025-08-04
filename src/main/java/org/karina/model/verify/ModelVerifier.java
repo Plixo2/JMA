@@ -1,20 +1,29 @@
 package org.karina.model.verify;
 
-import lombok.RequiredArgsConstructor;
-import org.karina.model.model.ClassModel;
+import org.jetbrains.annotations.Contract;
 import org.karina.model.model.Model;
-import org.karina.model.model.impl.SimpleModel;
-import org.karina.model.typing.Hierarchy;
 
-import java.util.List;
+import java.util.Objects;
 
-@RequiredArgsConstructor
 public final class ModelVerifier {
-    private final Model model;
+    public static final ModelVerifier DEFAULT = new ModelVerifier();
 
-    public void verify() {
-        for (var modelClass : this.model.classes()) {
-            var verifier = new ClassVerifier(this.model, modelClass);
+    private final Model existingClasses;
+
+    @Contract(value = "null -> fail")
+    public ModelVerifier(Model existingClasses) {
+        Objects.requireNonNull(existingClasses, "Existing classes cannot be null");
+        this.existingClasses = existingClasses;
+    }
+
+    private ModelVerifier() {
+        this(Model.EMPTY);
+    }
+
+    public void verify(Model model) {
+        var merged = Model.of(this.existingClasses, model);
+        for (var modelClass : model.classes()) {
+            var verifier = new ClassVerifier(merged, modelClass);
             verifier.verify();
         }
     }

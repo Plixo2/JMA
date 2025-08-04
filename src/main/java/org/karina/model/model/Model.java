@@ -94,24 +94,28 @@ public interface Model {
     Collection<? extends ClassModel> classes();
 
 
-    static ModelBuilder of(ClassModel classModel) {
+    static Model of(ClassModel classModel) {
         var modelBuilder = new ModelBuilder();
         modelBuilder.add(classModel);
-        return modelBuilder;
+        return modelBuilder.build();
     }
 
-    static ModelBuilder of(ClassModel... classes) {
+    static Model of(ClassModel... classes) {
         var modelBuilder = new ModelBuilder();
         for (var aClass : classes) {
             modelBuilder.add(aClass);
         }
-        return modelBuilder;
+        return modelBuilder.build();
     }
 
-    static ModelBuilder of(Iterable<? extends ClassModel> classes) {
+    static Model of(Iterable<? extends ClassModel> classes) {
         var modelBuilder = new ModelBuilder();
         modelBuilder.addAll(classes);
-        return modelBuilder;
+        return modelBuilder.build();
+    }
+
+    static Model of(Model... models) {
+        return builder(models).build();
     }
 
     static ModelBuilder builder() {

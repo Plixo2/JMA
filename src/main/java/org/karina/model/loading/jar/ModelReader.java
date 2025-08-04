@@ -21,12 +21,15 @@ import java.util.concurrent.Future;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 /// Utility class for reading java classes from a jar file and transforming them into a [Model].
 ///
 public final class ModelReader {
 
-    /// Creates a [Model] from a [JarFile]. Does not verify the model.
+    /// Creates a [UnlinkedModel] from a [JarFile]. Does not verify the model.
     ///
     /// @param identifier Identifier for the jar file, used for error messages and debugging
     /// @param jarFile JarFile to read
@@ -40,7 +43,7 @@ public final class ModelReader {
         return transform(identifier, readers);
     }
 
-    /// Creates a [Model] from a [JarInputStream]. Does not verify the model.
+    /// Creates a [UnlinkedModel] from a [JarInputStream]. Does not verify the model.
     ///
     /// @param identifier Identifier for the jar file, used for error messages and debugging
     /// @param stream JarInputStream to read classes from
@@ -55,7 +58,7 @@ public final class ModelReader {
         return transform(identifier, readers);
     }
 
-    /// Creates a [Model] from a jar file at the given [Path]. Does not verify the model.
+    /// Creates a [UnlinkedModel] from a jar file at the given [Path]. Does not verify the model.
     ///
     /// @param path Path to the jar file
     /// @throws IOException if the file cannot be read or does not exist
@@ -70,7 +73,33 @@ public final class ModelReader {
         }
     }
 
+    /// Creates a [UnlinkedModel] from a jmod file at the given [Path]. Does not verify the model.
+    ///
+    /// @param path Path to the jar file
+    /// @throws IOException if the file cannot be read or does not exist
+    /// @throws NullPointerException if the path is null
+    @CheckReturnValue
+    @Contract(pure = true, value = "null -> fail; !null -> new")
+    public static UnlinkedModel fromJMod(Path path) throws IOException {
+        Objects.requireNonNull(path, "Path cannot be null");
+        var map = new HashMap<String, ClassReader>();
+        try (var zipFile = new ZipFile(path.toFile())) {
+            for (var entries = zipFile.entries(); entries.hasMoreElements(); ) {
+                var entry = entries.nextElement();
+                if (!entry.getName().endsWith(".class")) {
+                    continue;
+                }
 
+                var reader = new ClassReader(zipFile.getInputStream(entry));
+                var prev = map.put(entry.getName(), reader);
+                if (prev != null) {
+                    throw new IOException("Duplicate class entry '" + entry.getName() + "' in jar file");
+                }
+            }
+        }
+        var absolutePath = path.toAbsolutePath().toString();
+        return transform(absolutePath, map);
+    }
 
 
     /// @return Map of file names to [ClassReader]
