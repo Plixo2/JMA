@@ -71,13 +71,13 @@ public final class ObjectPath implements Iterable<String> {
         return new ObjectPath(str.split(Pattern.quote(split)));
     }
 
-    /// Creates a instance from a Java-style path string (seperated by `/`).
+    /// Creates a instance from a Java binary class name (seperated by `/`).
     ///
     /// @param str the path string to convert, cannot be `null`
     /// @return a new {@link ObjectPath} instance representing the slash-separated path
     /// @throws NullPointerException if `str` is `null`
     @Contract(value = "null -> fail; _ -> new", pure = true)
-    public static ObjectPath fromJavaPath(String str) {
+    public static ObjectPath fromBinaryName(String str) {
         Objects.requireNonNull(str, "Path string cannot be null");
 
         return new ObjectPath(str.split("/"));

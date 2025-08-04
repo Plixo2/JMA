@@ -10,6 +10,6 @@ public class SetterGenerator {
     }
 
     public MethodModel generate(FieldModel field, String name) {
-
+        throw new NullPointerException("Not implemented yet");
     }
 }

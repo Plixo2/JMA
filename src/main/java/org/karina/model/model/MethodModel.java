@@ -1,7 +1,5 @@
 package org.karina.model.model;
 
-import com.google.errorprone.annotations.Immutable;
-import com.google.errorprone.annotations.ThreadSafe;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -15,9 +13,11 @@ import java.util.List;
 /// Represents a method in a class
 public interface MethodModel {
 
+
     /// @return the name of this method
     @Contract(pure = true)
     String name();
+
 
     /// @return the modifiers and flags of this method
     ///
@@ -49,7 +49,6 @@ public interface MethodModel {
     Type returnType();
 
 
-
     /// @return a non-mutable list of annotations
     @Unmodifiable
     @Contract(pure = true)
@@ -79,4 +78,20 @@ public interface MethodModel {
     ClassPointer classPointer();
 
 
+    /// @return if the method has instructions
+    @Contract(pure = true)
+    boolean hasInstructions();
+
+
+    /// @return the descriptor of this method, e.g. "(Ljava/lang/String;)V"
+    default String descriptor(Model model) {
+        StringBuilder sb = new StringBuilder();
+        sb.append('(');
+        for (var type : parameterTypes()) {
+            sb.append(type.getDescriptor(model));
+        }
+        sb.append(')');
+        sb.append(returnType().getDescriptor(model));
+        return sb.toString();
+    }
 }

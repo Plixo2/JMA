@@ -1,7 +1,12 @@
 package org.karina.model.verify;
 
 import lombok.RequiredArgsConstructor;
+import org.karina.model.model.ClassModel;
 import org.karina.model.model.Model;
+import org.karina.model.model.impl.SimpleModel;
+import org.karina.model.typing.Hierarchy;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 public final class ModelVerifier {

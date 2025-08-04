@@ -1,4 +1,3 @@
 package org.karina.model.model.pointer;
 
-public abstract class MethodPointer {
-}
+public interface MethodPointer {}

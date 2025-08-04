@@ -1,22 +1,17 @@
 package org.karina.model.model;
 
 
-import com.google.errorprone.annotations.Immutable;
-import com.google.errorprone.annotations.ThreadSafe;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import org.karina.model.exceptions.InvalidClassPointerException;
-import org.karina.model.exceptions.InvalidFieldPointerException;
-import org.karina.model.exceptions.InvalidGenericPointerException;
-import org.karina.model.exceptions.InvalidMethodPointerException;
+import org.karina.model.exceptions.*;
+import org.karina.model.model.impl.SimpleModel;
 import org.karina.model.model.pointer.ClassPointer;
-import org.karina.model.util.ObjectPath;
 import org.karina.model.model.pointer.FieldPointer;
 import org.karina.model.model.pointer.GenericPointer;
 import org.karina.model.model.pointer.MethodPointer;
 
-import java.util.List;
+import java.util.*;
 
 /// This interface represents a collection of classes. It provides methods to
 /// retrieve class, field and method models based on pointers.
@@ -62,10 +57,11 @@ import java.util.List;
 /// @see FieldPointer
 /// @see FieldModel
 public interface Model {
+    Model EMPTY = new SimpleModel(Collections.emptyMap());
 
-    /// @return The {@link ClassPointer} for a given internal path. Return null if the class could not be located.
+    /// @return The {@link ClassPointer} for a given binary name. Return null if the class could not be located.
     @Contract(pure = true)
-    @Nullable ClassPointer getClassPointer(ObjectPath innerPath);
+    @Nullable ClassPointer getClassPointer(String name);
 
 
     /// @return the current {@link MethodModel} for a given method pointer
@@ -77,11 +73,12 @@ public interface Model {
     /// @return the current {@link MethodModel} for a given method pointer
     /// @throws InvalidMethodPointerException if the {@link MethodModel} could not be located
     @Contract(pure = true)
-    MethodModel getMethod(MethodPointer model) throws InvalidMethodPointerException;
+    MethodModel getMethod(MethodPointer pointer) throws InvalidMethodPointerException;
 
 
     /// @return the current {@link GenericModel} for a given generic pointer
     /// @throws InvalidGenericPointerException if the {@link GenericModel} could not be located
+    @Contract(pure = true)
     GenericModel getGenericModel(GenericPointer pointer) throws InvalidGenericPointerException;
 
 
@@ -94,7 +91,119 @@ public interface Model {
     /// @return a list of all classes in the model.
     @Unmodifiable
     @Contract(pure = true)
-    List<ClassModel> classes();
+    Collection<? extends ClassModel> classes();
 
 
+    static ModelBuilder of(ClassModel classModel) {
+        var modelBuilder = new ModelBuilder();
+        modelBuilder.add(classModel);
+        return modelBuilder;
+    }
+
+    static ModelBuilder of(ClassModel... classes) {
+        var modelBuilder = new ModelBuilder();
+        for (var aClass : classes) {
+            modelBuilder.add(aClass);
+        }
+        return modelBuilder;
+    }
+
+    static ModelBuilder of(Iterable<? extends ClassModel> classes) {
+        var modelBuilder = new ModelBuilder();
+        modelBuilder.addAll(classes);
+        return modelBuilder;
+    }
+
+    static ModelBuilder builder() {
+        return new ModelBuilder();
+    }
+
+    static ModelBuilder builder(Model model) {
+        var modelBuilder = new ModelBuilder();
+        for (var aClass : model.classes()) {
+            modelBuilder.add(aClass);
+        }
+        return modelBuilder;
+    }
+
+    static ModelBuilder builder(Model... models) {
+        var modelBuilder = new ModelBuilder();
+        for (var model : models) {
+            for (var aClass : model.classes()) {
+                modelBuilder.add(aClass);
+            }
+        }
+        return modelBuilder;
+    }
+
+
+
+    class ModelBuilder {
+        private final Map<String, ClassModel> modelMap = new HashMap<>();
+
+        private ModelBuilder() {}
+        private ModelBuilder(Map<String, ? extends ClassModel> classes) {
+            this.modelMap.putAll(classes);
+        }
+
+
+
+        /// Adds a Class to the model.
+        ///
+        /// @param classModel the ClassModel to add
+        /// @throws NullPointerException if classModel is null
+        /// @throws DuplicateClassModel  when a ClassModel with the same name already exists in the model
+        @Contract(value = "null -> fail", mutates = "this")
+        public void add(ClassModel classModel) {
+            Objects.requireNonNull(classModel, "ClassModel cannot be null");
+
+            var name = classModel.binaryName();
+
+            var existingClassModel = this.modelMap.get(name);
+
+            if (existingClassModel != null) {
+                throw new DuplicateClassModel(classModel, existingClassModel);
+            } else {
+                this.modelMap.put(name, classModel);
+            }
+
+        }
+
+
+        /// Adds a collection of ClassModels to the model.
+        ///
+        /// @param classModels the collection of ClassModels to add
+        /// @throws NullPointerException if the provided collection is null or contains any null elements
+        /// @throws DuplicateClassModel  when a ClassModel with the same name already exists in the model
+        @Contract(value = "null -> fail", mutates = "this")
+        public void addAll(Iterable<? extends ClassModel> classModels) {
+            Objects.requireNonNull(classModels, "ClassModel collection cannot be null");
+
+            for (var cm : classModels) {
+                add(cm);
+            }
+        }
+
+        /// Adds a collection of ClassModels to the model.
+        ///
+        /// @param classModels the collection of ClassModels to add
+        /// @throws NullPointerException if the provided collection is null or contains any null elements
+        /// @throws DuplicateClassModel  when a ClassModel with the same name already exists in the model
+        @Contract(value = "null -> fail", mutates = "this")
+        public void add(ClassModel... classModels) {
+            Objects.requireNonNull(classModels, "ClassModel array cannot be null");
+
+            for (var cm : classModels) {
+                add(cm);
+            }
+
+        }
+
+
+        public Model build() {
+            return new SimpleModel(this.modelMap);
+        }
+
+
+    }
 }

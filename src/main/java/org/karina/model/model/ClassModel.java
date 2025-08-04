@@ -11,39 +11,32 @@ import org.karina.model.model.pointer.MethodPointer;
 import org.karina.model.util.LoadedClassIdentifier;
 
 import java.util.List;
-import java.util.Map;
 
 /// Represents a class.
 public interface ClassModel {
 
 
-    /// Class version (not used internally)
+    /// Class version
     /// @return the bytecode version of this class
     ///
-    /// @see org.karina.model.util.Version
     @Range(from = 0, to = Integer.MAX_VALUE)
     @Contract(pure = true)
     @SuppressWarnings("unused")
     int version();
 
 
-
-    /// The simple class name
+    /// The binary class name
     ///
-    /// @return the simple name of this class
+    /// @return the binary name of this class
     @Contract(pure = true)
-    String name();
+    String binaryName();
 
 
-    /// Return the internal path to this class.
+    /// Return path to this class.
     ///
     /// @return the path to this class
     @Contract(pure = true)
-    ObjectPath outerPath();
-
-    /// The inner name of the inner class inside its enclosing class.
-    /// @return the inner name of this class. May be null, if this class is not a member of a class (for local or anonymous classes).
-    @Nullable String innerName();
+    ObjectPath path();
 
 
     /// The unique pointer to the current instance in the model.
@@ -53,10 +46,14 @@ public interface ClassModel {
 
 
     /// @return the modifiers and flags of this class
-    ///
     /// @see org.karina.model.util.Flags
     @Contract(pure = true)
     int flags();
+
+
+    /// @return the inner name and flags, when this class is an inner class. May be null
+    @Contract(pure = true)
+    @Nullable InnerClassInfo innerClassInfo();
 
 
     /// @return a non-mutable list of generics
@@ -85,7 +82,7 @@ public interface ClassModel {
     /// such platform-specific additional information must be supplied by the run-time interpreter or
     /// development tool at the time the file name is actually used.
     ///
-    /// See {@link #loadedSource()} for information on where (and how) the class was <b>loaded</b>.
+    /// See {@link #identifier()} for information on where (and how) the class was <b>loaded</b>.
     ///
     /// @return The name of the source file from which this class was compiled. May be null
     ///
@@ -96,20 +93,25 @@ public interface ClassModel {
     /// A location identifier for the source of this class, indicating where (and how) it was loaded from.
     /// This should be a meaningful identifier as it is used for debugging and error reporting.
     ///
-    /// @return Sort of like {@link #compiledSource()}, but used for identifying where and how the class
-    ///         was loaded, not where it was compiled.
+    /// @return Sort of like {@link #compiledSource()}, but used for identifying how the class
+    ///         was loaded, not from where the class was compiled.
     @Contract(pure = true)
-    LoadedClassIdentifier loadedSource();
+    LoadedClassIdentifier identifier();
 
 
-    /// @return the outer class of this class. May be null
+    /// @return the outer class of this class. May be null if this class is not a nested class.
     @Contract(pure = true)
     @Nullable ClassPointer outerClass();
 
 
+    /// For local and anonymous classes this returns the class and
+    /// method (if any) where this class was defined.
+    /// Always returns null for non local and non anonymous classes.
+    ///
     /// @return the method where this class was defined. May be null
+    ///
     @Contract(pure = true)
-    @Nullable MethodPointer outerMethod();
+    @Nullable ClassModel.LocalAndAnonymousInfo enclosingMethod();
 
 
     /// @return a non-mutable list of annotations
@@ -121,7 +123,7 @@ public interface ClassModel {
     /// @return a non-mutable list of inner classes
     @Unmodifiable
     @Contract(pure = true)
-    Map<String, ClassPointer> innerClasses();
+    List<ClassPointer> nestedClasses();
 
 
     /// @return the nest host of this class. May be null
@@ -157,4 +159,35 @@ public interface ClassModel {
     List<? extends MethodModel> methods();
 
 
+    /// Information about local and anonymous classes.
+    interface LocalAndAnonymousInfo {
+
+        /// @return The method where this class was defined. May be null
+        @Contract(pure = true)
+        @Nullable MethodPointer method();
+
+        /// @return The class where this class was defined.
+        @Contract(pure = true)
+        ClassPointer classPointer();
+
+    }
+
+
+    /// Information about local and inner classes
+    interface InnerClassInfo {
+
+        /// If this class is a nested class, this returns the name of this class
+        /// originally defined in the source code.
+        /// @return the inner name of this class.
+        @Contract(pure = true)
+        String name();
+
+        /// @return the modifiers and flags original defined in the source code. Only valid for inner classes.
+        /// Will be ignored by the jvm.
+        ///
+        /// 4.7.6-A
+        /// @see org.karina.model.util.Flags
+        @Contract(pure = true)
+        int flags();
+    }
 }

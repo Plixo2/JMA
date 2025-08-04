@@ -1,7 +1,5 @@
 package org.karina.model.model;
 
-import com.google.errorprone.annotations.Immutable;
-import com.google.errorprone.annotations.ThreadSafe;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
@@ -69,4 +67,8 @@ public interface FieldModel {
     ClassPointer classPointer();
 
 
+    /// @return the descriptor of this field
+    default String descriptor(Model model) {
+        return this.type().getDescriptor(model);
+    }
 }
