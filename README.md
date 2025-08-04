@@ -21,11 +21,11 @@
 **JMA (JVM Model API)** is a high-level framework for analyzing, validating, and generating JVM class structures, supporting class files from **Java 8 to Java 24**.
 
 It is designed to be:
-- 🔒 **Fully compatible** with the [_Java® Virtual Machine Specification, Java SE 24 Edition_](https://docs.oracle.com/javase/specs/jvms/se24/html/index.html)
-- 🔁 **Interoperable** with tools like [ASM](https://asm.ow2.io/)
-- 🔧 **Extensible** with custom validation, linking, and type resolution mechanisms
-- 🧵 **Modular** with full support for the **Java Platform Module System (JPMS)**
-- 🧠 **Compiler-oriented**, aiming to serve as a backend framework for **language implementations** on the JVM
+-  **Fully compatible** with the [_Java® Virtual Machine Specification, Java SE 24 Edition_](https://docs.oracle.com/javase/specs/jvms/se24/html/index.html)
+-  **Interoperable** with tools like [ASM](https://asm.ow2.io/)
+-  **Extensible** with custom validation, linking, and type resolution mechanisms
+-  **Modular** with full support for the **Java Platform Module System (JPMS)**
+-  **Compiler-oriented**, aiming to serve as a backend framework for **language implementations** on the JVM
 
 JMA handles generics, annotations, bridge method generation, module resolution, and provides **meaningful error messages** — including **source code locations** — to simplify debugging and diagnostics.
 
@@ -34,11 +34,11 @@ It is ideal for:
 - Building compilers for new JVM languages
 - Validating or rewriting `.class` or `.jar` files with full spec compliance
 
-> ✅ See [Karina](https://karina-lang.org/) for an example of a JVM language built on top of JMA.
+>  See [Karina](https://karina-lang.org/) for an example of a JVM language built on top of JMA.
 
 ---
 
-## 🚀 Quick Example
+##  Quick Example
 
 ```java
 // Locate the JDK's java.base.jmod file (which contains the core Java classes)
